@@ -18,32 +18,91 @@ common warnings
 
 library
     import:           warnings
-    exposed-modules:  MyLib
+    exposed-modules:  Exp
+                      ExpS
+                      Codegen
+                      LoopCodegen
     -- other-modules:
     -- other-extensions:
     build-depends:
-        base ^>=4.18.2.1
-      , llvm-hs ^>=15.0.0
+        base >=4.18.0.0 && <4.21
       , llvm-hs-pure ^>=15.0.0
-      , transformers
-      , unordered-containers
+      , transformers ^>= 0.6.1.2
+      , unordered-containers ^>= 0.2.20
+      , containers ^>= 0.7
+      , bytestring ^>= 0.12.1.0
     hs-source-dirs:   src
     default-language: GHC2021
 
-executable haskell-dsl-llvm
+executable example-pp
     import:           warnings
     main-is:          Main.hs
     -- other-modules:
     -- other-extensions:
     build-depends:
-        base ^>=4.18.2.1
+        base >=4.18.0.0 && <4.21
       , haskell-dsl-llvm
       , llvm-hs ^>=15.0.0
       , llvm-hs-pure ^>=15.0.0
-      , containers
-      , bytestring
+      , containers ^>= 0.7
+      , bytestring ^>= 0.12.1.0
+      , deepseq >= 1.4.8.1 && <1.6
+
+    hs-source-dirs:   pp
+    default-language: GHC2021
+
+executable example-run
+    import:           warnings
+    main-is:          Main.hs
+    -- other-modules:
+    -- other-extensions:
+    build-depends:
+        base >=4.18.0.0 && <4.21
+      , haskell-dsl-llvm
+      , llvm-hs ^>=15.0.0
+      , llvm-hs-pure ^>=15.0.0
+      , containers ^>= 0.7
+      , bytestring ^>= 0.12.1.0
+      , deepseq >= 1.4.8.1 && <1.6
 
     hs-source-dirs:   app
+    default-language: GHC2021
+
+executable example-run-loop
+    import:           warnings
+    main-is:          Main.hs
+    -- other-modules:
+    -- other-extensions:
+    build-depends:
+        base >=4.18.0.0 && <4.21
+      , haskell-dsl-llvm
+      , llvm-hs ^>=15.0.0
+      , llvm-hs-pure ^>=15.0.0
+      , containers ^>= 0.7
+      , bytestring ^>= 0.12.1.0
+      , deepseq >= 1.4.8.1 && <1.6
+      , vector ^>= 0.13.2.0
+
+    hs-source-dirs:   loop
+    default-language: GHC2021
+
+executable example-benchmark
+    import:           warnings
+    main-is:          Main.hs
+    -- other-modules:
+    -- other-extensions:
+    build-depends:
+        base >=4.18.0.0 && <4.21
+      , haskell-dsl-llvm
+      , llvm-hs ^>=15.0.0
+      , llvm-hs-pure ^>=15.0.0
+      , containers ^>= 0.7
+      , bytestring ^>= 0.12.1.0
+      , deepseq >= 1.4.8.1 && <1.6
+      , vector ^>= 0.13.2.0
+      , criterion ^>= 1.6.4.0
+
+    hs-source-dirs:   benchmark
     default-language: GHC2021
 
 test-suite haskell-dsl-llvm-test
@@ -55,5 +114,5 @@ test-suite haskell-dsl-llvm-test
     hs-source-dirs:   test
     main-is:          Main.hs
     build-depends:
-        base ^>=4.18.2.1,
-        haskell-dsl-llvm
+        base >=4.18.0.0 && <4.21
+      , haskell-dsl-llvm
