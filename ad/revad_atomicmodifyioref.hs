@@ -35,9 +35,7 @@ data Reverse s a = Reverse { primal :: !a, sensitivityIndex :: !(Maybe Int) }
 addNode :: Node -> M Int
 addNode n = do
   r <- ask
-  Tape i ns <- lift $ readIORef r
-  lift $ writeIORef r (Tape (i + 1) (n : ns))
-  pure i
+  lift $ atomicModifyIORef' r (\(Tape i ns) -> (Tape (i + 1) (n : ns), i))
 
 runNode :: forall a s. Reifies s (IORef Tape) => M (Reverse s a) -> Reverse s a
 runNode action = let r = reflect (Proxy :: Proxy s)
