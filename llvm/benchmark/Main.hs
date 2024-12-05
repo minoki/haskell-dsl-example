@@ -30,6 +30,12 @@ withSimpleJIT expr doFun = do
     _ <- LLVM.Linking.loadLibraryPermanently Nothing
     LLVM.Module.withModuleFromAST context (Codegen.codegen expr) $ \mod' -> do
       LLVM.Target.withHostTargetMachine LLVM.Relocation.PIC LLVM.CodeModel.JITDefault LLVM.CodeGenOpt.Default $ \targetMachine -> do
+        let passSetSpec = LLVM.Passes.PassSetSpec
+                          { LLVM.Passes.passes = [LLVM.Passes.CuratedPassSet 2]
+                          , LLVM.Passes.targetMachine = Nothing -- Just targetMachine
+                          }
+        LLVM.Passes.runPasses passSetSpec mod'
+
         JIT.withExecutionSession $ \executionSession -> do
           dylib <- JIT.createJITDylib executionSession "myDylib"
           JIT.withClonedThreadSafeModule mod' $ \threadSafeModule -> do
@@ -37,12 +43,6 @@ withSimpleJIT expr doFun = do
             compileLayer <- JIT.createIRCompileLayer executionSession objectLayer targetMachine
             JIT.addDynamicLibrarySearchGeneratorForCurrentProcess compileLayer dylib
             JIT.addModule threadSafeModule dylib compileLayer
-
-            let passSetSpec = LLVM.Passes.PassSetSpec
-                              { LLVM.Passes.passes = [LLVM.Passes.CuratedPassSet 2]
-                              , LLVM.Passes.targetMachine = Nothing -- Just targetMachine
-                              }
-            LLVM.Passes.runPasses passSetSpec mod'
 
             sym <- JIT.lookupSymbol executionSession compileLayer dylib "f"
             case sym of
@@ -63,6 +63,12 @@ withArrayJIT expr doFun = do
     _ <- LLVM.Linking.loadLibraryPermanently Nothing
     LLVM.Module.withModuleFromAST context (LoopCodegen.codegenNoAlias expr) $ \mod' -> do
       LLVM.Target.withHostTargetMachine LLVM.Relocation.PIC LLVM.CodeModel.JITDefault LLVM.CodeGenOpt.Default $ \targetMachine -> do
+        let passSetSpec = LLVM.Passes.PassSetSpec
+                          { LLVM.Passes.passes = [LLVM.Passes.CuratedPassSet 2]
+                          , LLVM.Passes.targetMachine = Just targetMachine
+                          }
+        LLVM.Passes.runPasses passSetSpec mod'
+
         JIT.withExecutionSession $ \executionSession -> do
           dylib <- JIT.createJITDylib executionSession "myDylib"
           JIT.withClonedThreadSafeModule mod' $ \threadSafeModule -> do
@@ -70,12 +76,6 @@ withArrayJIT expr doFun = do
             compileLayer <- JIT.createIRCompileLayer executionSession objectLayer targetMachine
             JIT.addDynamicLibrarySearchGeneratorForCurrentProcess compileLayer dylib
             JIT.addModule threadSafeModule dylib compileLayer
-
-            let passSetSpec = LLVM.Passes.PassSetSpec
-                              { LLVM.Passes.passes = [LLVM.Passes.CuratedPassSet 2]
-                              , LLVM.Passes.targetMachine = Just targetMachine
-                              }
-            LLVM.Passes.runPasses passSetSpec mod'
 
             sym <- JIT.lookupSymbol executionSession compileLayer dylib "f"
             case sym of
@@ -113,9 +113,9 @@ main = do
   _ <- withSimpleJIT expr $ \simpleF ->
     withArrayJIT expr $ \arrayF ->
       defaultMain
-        [ bench "Haskell/vector" $ whnf (VS.map f) input
-        , bench "Haskell unrolled/vector" $ whnf (VS.map g) input
-        , bench "JIT/vector" $ whnf (VS.map simpleF) input
+        [ bench "Haskell/map" $ whnf (VS.map f) input
+        , bench "Haskell unrolled/map" $ whnf (VS.map g) input
+        , bench "JIT/map" $ whnf (VS.map simpleF) input
         , bench "JIT/array" $ whnf arrayF input
         ]
   pure ()

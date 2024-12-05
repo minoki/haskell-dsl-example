@@ -29,6 +29,27 @@ withArrayJIT expr doFun = do
     _ <- LLVM.Linking.loadLibraryPermanently Nothing
     LLVM.Module.withModuleFromAST context (codegenNoAlias expr) $ \mod' -> do
       LLVM.Target.withHostTargetMachine LLVM.Relocation.PIC LLVM.CodeModel.JITDefault LLVM.CodeGenOpt.Default $ \targetMachine -> do
+        asm <- LLVM.Module.moduleLLVMAssembly mod'
+        putStrLn "*** Before optimization ***"
+        BS.putStr asm
+        putStrLn "***************************"
+
+        let passSetSpec = LLVM.Passes.PassSetSpec
+                          { LLVM.Passes.passes = [LLVM.Passes.CuratedPassSet 2]
+                          , LLVM.Passes.targetMachine = Just targetMachine
+                          }
+        LLVM.Passes.runPasses passSetSpec mod'
+
+        asm' <- LLVM.Module.moduleLLVMAssembly mod'
+        putStrLn "*** After optimization ***"
+        BS.putStr asm'
+        putStrLn "**************************"
+
+        tasm <- LLVM.Module.moduleTargetAssembly targetMachine mod'
+        putStrLn "*** Target assembly ***"
+        BS.putStr tasm
+        putStrLn "***********************"
+
         JIT.withExecutionSession $ \executionSession -> do
           dylib <- JIT.createJITDylib executionSession "myDylib"
           JIT.withClonedThreadSafeModule mod' $ \threadSafeModule -> do
@@ -36,27 +57,6 @@ withArrayJIT expr doFun = do
             compileLayer <- JIT.createIRCompileLayer executionSession objectLayer targetMachine
             JIT.addDynamicLibrarySearchGeneratorForCurrentProcess compileLayer dylib
             JIT.addModule threadSafeModule dylib compileLayer
-
-            asm <- LLVM.Module.moduleLLVMAssembly mod'
-            putStrLn "*** Before optimization ***"
-            BS.putStr asm
-            putStrLn "***************************"
-
-            let passSetSpec = LLVM.Passes.PassSetSpec
-                              { LLVM.Passes.passes = [LLVM.Passes.CuratedPassSet 2]
-                              , LLVM.Passes.targetMachine = Just targetMachine
-                              }
-            LLVM.Passes.runPasses passSetSpec mod'
-
-            asm' <- LLVM.Module.moduleLLVMAssembly mod'
-            putStrLn "*** After optimization ***"
-            BS.putStr asm'
-            putStrLn "**************************"
-
-            tasm <- LLVM.Module.moduleTargetAssembly targetMachine mod'
-            putStrLn "*** Target assembly ***"
-            BS.putStr tasm
-            putStrLn "***********************"
 
             sym <- JIT.lookupSymbol executionSession compileLayer dylib "f"
             case sym of
