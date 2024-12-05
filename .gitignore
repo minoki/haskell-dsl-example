@@ -1,2 +1,4 @@
 dist-newstyle/
+dist-ncg/
+dist-llvm/
 cabal.project.local
