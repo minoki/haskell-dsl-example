@@ -86,7 +86,7 @@ withArrayJIT expr doFun = do
                 let ptrFn = mkDoubleArrayFun . castPtrToFunPtr $ wordPtrToPtr fnAddr
                     vecFn !inputVec = unsafePerformIO $ do
                       let !n = VS.length inputVec
-                      resultVec <- VSM.new n
+                      resultVec <- VSM.unsafeNew n
                       VS.unsafeWith inputVec $ \inputPtr ->
                         VSM.unsafeWith resultVec $ \resultPtr ->
                           ptrFn (fromIntegral n) resultPtr inputPtr
