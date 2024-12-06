@@ -95,7 +95,7 @@ withArrayJIT expr doFun = do
                 Just <$> evaluate (force result)
 
 f :: Num a => a -> a
-f x = (x + 1)^10
+f x = (x + 1)^(10 :: Int)
 {-# SPECIALIZE f :: Double -> Double #-}
 
 g :: Num a => a -> a

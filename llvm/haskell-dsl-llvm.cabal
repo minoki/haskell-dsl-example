@@ -86,8 +86,9 @@ executable example-run-loop
     hs-source-dirs:   loop
     default-language: GHC2021
 
-executable example-benchmark
+benchmark llvm-benchmark
     import:           warnings
+    type:             exitcode-stdio-1.0
     main-is:          Main.hs
     -- other-modules:
     -- other-extensions:
