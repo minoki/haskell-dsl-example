@@ -22,7 +22,7 @@ library
     -- other-modules:
     -- other-extensions:
     build-depends:
-        base >=4.18.0.0 && <4.21
+        base >=4.18.0.0 && <4.22
       , vector ^>= 0.13.2.0
     hs-source-dirs:   src
     default-language: GHC2021
@@ -33,7 +33,7 @@ executable haskell-dsl-simd
     -- other-modules:
     -- other-extensions:
     build-depends:
-        base >=4.18.0.0 && <4.21
+        base >=4.18.0.0 && <4.22
       , haskell-dsl-simd
       , vector ^>= 0.13.2.0
 
@@ -47,7 +47,7 @@ benchmark simd-benchmark
     -- other-modules:
     -- other-extensions:
     build-depends:
-        base >=4.18.0.0 && <4.21
+        base >=4.18.0.0 && <4.22
       , haskell-dsl-simd
       , vector ^>= 0.13.2.0
       , criterion ^>= 1.6.4.0
@@ -64,5 +64,5 @@ test-suite haskell-dsl-simd-test
     hs-source-dirs:   test
     main-is:          Main.hs
     build-depends:
-        base ^>=4.18.2.1,
+        base >=4.18.0.0 && <4.22,
         haskell-dsl-simd
